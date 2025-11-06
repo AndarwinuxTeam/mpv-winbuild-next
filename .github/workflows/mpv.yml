@@ -15,11 +15,8 @@ on:
         default: "all"
         type: choice
         options:
-        - 64bit
-        - 64bit-v3
         - 64bit-v4
-        - 64bit-znver5
-        - aarch64
+        - aarch64-armv9.2-a
         - all
       lgpl:
         description: "Also build lgpl libmpv"
@@ -80,26 +77,17 @@ jobs:
             let matrix = {};
             let build_target = "${{ inputs.build_target }}"
             switch ( build_target ) {
-              case "64bit":
-                matrix.bit = ["64"];
-                break;
-              case "64bit-v3":
-                matrix.bit = ["64-v3"];
-                break;
               case "64bit-v4":
                 matrix.bit = ["64-v4"];
                 break;
-              case "64bit-znver5":
-                matrix.bit = ["64-znver5"];
-                break;
-              case "aarch64":
-                matrix.bit = ["aarch64"];
+              case "aarch64-armv9.2-a":
+                matrix.bit = ["aarch64-armv9.2-a"];
                 break;
               case "all":
-                matrix.bit = ["64-v3","64-v4","aarch64"];
+                matrix.bit = ["64-v4","aarch64-armv9.2-a"];
                 break;
               default:
-                matrix.bit = ["64-v3","64-v4","aarch64"];
+                matrix.bit = ["64-v4","aarch64-armv9.2-a"];
                 break;
             }
             core.setOutput("matrix_bit",JSON.stringify(matrix));
@@ -352,23 +340,14 @@ jobs:
           srcdir=$(pwd)/src_packages
           
           builddir=$buildroot/build$bit
-          if [ $bit == "64" ]; then
-              arch="x86_64"
-              gcc_arch=-DMARCH=x86-64
-          elif [ $bit == "64-v3" ]; then
-              arch="x86_64"
-              gcc_arch=-DMARCH=x86-64-v3
-              x86_64_level=-v3
-          elif [ $bit == "64-v4" ]; then
+          if [ $bit == "64-v4" ]; then
               arch="x86_64"
               gcc_arch=-DMARCH=x86-64-v4
-              x86_64_level=-v4
-          elif [ $bit == "64-znver5" ]; then
-              arch="x86_64"
-              gcc_arch=-DMARCH=znver5
-              x86_64_level=-znver5
-          elif [ $bit == "aarch64" ]; then
+              arch_level=-v4
+          elif [ $bit == "aarch64-armv9.2-a" ]; then
               arch="aarch64"
+              gcc_arch=-DMARCH=cortex-x925
+              arch_level=-armv9.2-a
           fi
           retry-tool() {
             local RETRY_COUNTER=0
@@ -420,20 +399,11 @@ jobs:
             const lgpl = ${{ matrix.lgpl }} ? "-lgpl" : "";
             let arch="";
             switch ( "${{ matrix.bit }}" ) {
-              case "64":
-                arch = "x86_64";
-                break;
-              case "64-v3":
-                arch = "x86_64-v3";
-                break;
               case "64-v4":
                 arch = "x86_64-v4";
                 break;
-              case "64-znver5":
-                arch = "x86_64-znver5";
-                break;
-              case "aarch64":
-                arch = "aarch64";
+              case "aarch64-armv9.2-a":
+                arch = "aarch64-armv9.2-a";
                 break;
             }
             for (let type of types) {
@@ -801,11 +771,8 @@ jobs:
             note+="**Download Tips:**\n";
             const path = require('path');
             const tips = {
-              "i686": "for 32 bit system",
-              "x86_64": "for x64 system with cpu not older than Intel Skylake or AMD Zen",
-              "x86_64-v3": "for x64 system with cpu not older than Intel Skylake or AMD Zen",
               "x86_64-v4": "for x64 system with cpu not older than Intel Rocketlake or AMD Zen4",
-              "aarch64": "for arm64 system with cpu not older than cortex-a76/a55(v8.2-a)"
+              "aarch64-armv9.2-a": "for arm64 system with cpu not older than cortex-a520/a720/x4(v9.2-a)"
             }
             async function getTips(arch){
               const globber = await glob.create(`artifacts/mpv-${arch}-[0-9]*.7z`);

@@ -127,9 +127,7 @@ bin-cpuflags-x86 can statically analyze which instructions an executable uses, w
 
 > [!NOTE]
 >
-> This repo only provides x86-64-v3/v4 and aarch64 version.
->
-> I have added a znver5 template, if more variants needed just copy and paste it.
+> This repo only provides x86-64-v4 and aarch64-armv9.2-a version.
 >
 > If you need to customize the build process more, change all `Andarwinux/mpv-winbuild-cmake` to your own fork.
 >

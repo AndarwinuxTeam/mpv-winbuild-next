@@ -25,10 +25,8 @@ on:
         default: "all"
         type: choice
         options:
-        - 64bit
-        - 64bit-v3
         - 64bit-v4
-        - aarch64
+        - aarch64-armv9.2-a
         - all
       trigger_build:
         description: "Trigger mpv build action after toolchain build"
@@ -92,7 +90,7 @@ jobs:
           bit: "64-v4"
           compiler: "clang"
           command: "ninja -C $buildroot/build$bit toolchains-download || true ; ninja -C $buildroot/build$bit toolchains-download && ninja -C $buildroot/build$bit llvm-host-libcxx && ninja -C $buildroot/build$bit llvm && ninja -C $buildroot/build$bit toolchains-fullclean"
-          extra_option: "${{ inputs.pgo && '-DCUSTOM_LIBCXX=ON -DCUSTOM_COMPILER_RT=OFF -DLLVM_ENABLE_PGO=GEN -DLLVM_ENABLE_LTO=Thin -DLLVM_PROFILE_DATA_DIR=$PWD/profiles/ -DTOOLCHAIN_FLAGS=-mno-sse4a'}}"
+          extra_option: "${{ inputs.pgo && '-DLLVM_ENABLE_UNSAFE_X86_AVX512_VFABI=ON -DCUSTOM_LIBCXX=ON -DCUSTOM_COMPILER_RT=OFF -DLLVM_ENABLE_PGO=GEN -DLLVM_ENABLE_LTO=Thin -DLLVM_PROFILE_DATA_DIR=$PWD/profiles/ -DTOOLCHAIN_FLAGS=-mno-sse4a'}}"
 
       - name: Training LLVM
         uses: ./action/build_toolchain
@@ -101,7 +99,7 @@ jobs:
           bit: "64-v4"
           compiler: "clang"
           command: "ninja -C $buildroot/build$bit rebuild_cache && ninja -C $buildroot/build$bit toolchains-download && ninja -C $buildroot/build$bit llvm-clang && ninja -C $buildroot/build$bit curl harfbuzz aria2"
-          extra_option: "-DCUSTOM_LIBCXX=ON -DCUSTOM_COMPILER_RT=OFF -DLLVM_ENABLE_PGO=GEN -DLLVM_ENABLE_LTO=Thin -DENABLE_CCACHE=ON -DLLVM_PROFILE_DATA_DIR=$buildroot/profiles/ -DTOOLCHAIN_FLAGS=-mno-sse4a"
+          extra_option: "-DLLVM_ENABLE_UNSAFE_X86_AVX512_VFABI=ON -DCUSTOM_LIBCXX=ON -DCUSTOM_COMPILER_RT=OFF -DLLVM_ENABLE_PGO=GEN -DLLVM_ENABLE_LTO=Thin -DENABLE_CCACHE=ON -DLLVM_PROFILE_DATA_DIR=$buildroot/profiles/ -DTOOLCHAIN_FLAGS=-mno-sse4a"
 
       - name: Merging profdata
         if: ${{ inputs.pgo }}
@@ -119,7 +117,7 @@ jobs:
           bit: "64-v4"
           compiler: "clang"
           command: "ninja -C $buildroot/build$bit toolchains-fullclean && ninja -C $buildroot/build$bit llvm-host-compiler-rt-builtin && ninja -C $buildroot/build$bit llvm-host-libcxx && ninja -C $buildroot/build$bit llvm"
-          extra_option: "-DCUSTOM_LIBCXX=ON -DCUSTOM_COMPILER_RT=ON -DLLVM_ENABLE_PGO=USE -DLLVM_ENABLE_LTO=Thin -DLLVM_PROFDATA_FILE=$buildroot/llvm.profdata -DTOOLCHAIN_FLAGS=-mno-sse4a"
+          extra_option: "-DLLVM_ENABLE_UNSAFE_X86_AVX512_VFABI=ON -DCUSTOM_LIBCXX=ON -DCUSTOM_COMPILER_RT=ON -DLLVM_ENABLE_PGO=USE -DLLVM_ENABLE_LTO=Thin -DLLVM_PROFDATA_FILE=$buildroot/llvm.profdata -DTOOLCHAIN_FLAGS=-mno-sse4a"
 
       - name: Test
         run: |

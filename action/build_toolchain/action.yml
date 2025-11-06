@@ -4,7 +4,7 @@ inputs:
   bit:
     description: "target bit"
     required: false
-    default: "64-v3"
+    default: "64-v4"
   compiler:
     description: "target bit"
     required: false
@@ -42,25 +42,16 @@ runs:
         buildroot=$(pwd)
         srcdir=$(pwd)/src_packages
 
-        if [ $bit == "64" ]; then
-            arch="x86_64"
-            gcc_arch=-DMARCH=x86-64
-        elif [ $bit == "64-v3" ]; then
-            arch="x86_64"
-            gcc_arch=-DMARCH=skylake
-            arch_option=(-DMARCH_NAME=-v3)
-            x86_64_level=-v3
-        elif [ $bit == "64-v4" ]; then
+        if [ $bit == "64-v4" ]; then
             arch="x86_64"
             gcc_arch=-DMARCH=tigerlake
             arch_option=(-DMARCH_NAME=-v4 -DCLANG_FLAGS="-mprefer-vector-width=512")
-            x86_64_level=-v4
-        elif [ $bit == "64-znver5" ]; then
-            arch="x86_64"
-            gcc_arch=-DMARCH=znver5
-            x86_64_level=-znver5
-        elif [ $bit == "aarch64" ]; then
+            arch_level=-v4
+        elif [ $bit == "aarch64-armv9.2-a" ]; then
             arch="aarch64"
+            gcc_arch=-DMARCH=cortex-x925
+            arch_option=(-DMARCH_NAME=-armv9.2-a)
+            arch_level=-armv9.2-a
         fi
         set -x
         if [ "$compiler" == "clang" ]; then
